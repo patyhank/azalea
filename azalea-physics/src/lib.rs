@@ -10,6 +10,7 @@ use azalea_world::{
 };
 use collision::{MovableEntity, MoverType};
 use std::ops::Deref;
+use azalea_world::entity::EntityDataValue::BlockState;
 
 pub trait HasPhysics {
     fn travel(&mut self, acceleration: &Vec3);
@@ -27,7 +28,7 @@ impl<D: Deref<Target = WeakWorld>> HasPhysics for Entity<'_, D> {
         //     return;
         // }
 
-        let gravity: f64 = 0.08;
+        let gravity: f64 = 0.00;
 
         // TODO: slow falling effect
         // let is_falling = self.delta.y <= 0.;
