@@ -126,10 +126,9 @@ pub async fn start<
     while let Some(event) = rx.recv().await {
         let cloned_plugins = (*bot.plugins).clone();
         for plugin in cloned_plugins.into_iter() {
-            tokio::spawn(async move {
-                plugin.handle(event.clone(), bot.clone()).await;
-            });
+            tokio::spawn(plugin.handle(event.clone(), bot.clone()));
         }
+
         tokio::spawn((options.handle)(bot.clone(), event.clone(), state.clone()));
     }
 

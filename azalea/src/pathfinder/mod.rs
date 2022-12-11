@@ -29,7 +29,7 @@ pub struct State {
     pub path: Arc<Mutex<VecDeque<Node>>>,
 }
 
-#[async_trait(?Send)]
+#[async_trait]
 impl crate::PluginState for State {
     async fn handle(self: Box<Self>, event: Event, mut bot: Client) {
         if let Event::Tick = event {

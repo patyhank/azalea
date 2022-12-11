@@ -6,8 +6,6 @@ use std::{
     collections::HashMap,
     hash::BuildHasherDefault,
 };
-use std::future::Future;
-use std::pin::Pin;
 
 type U64Hasher = BuildHasherDefault<NoHashHasher<u64>>;
 
@@ -81,7 +79,7 @@ impl IntoIterator for PluginStates {
 
 /// A `PluginState` keeps the current state of a plugin for a client. All the
 /// fields must be atomic. Unique `PluginState`s are built from [`Plugin`]s.
-#[async_trait(?Send)]
+#[async_trait]
 pub trait PluginState: Send + Sync + PluginStateClone + Any + 'static {
     async fn handle(self: Box<Self>, event: Event, bot: Client);
 }
@@ -101,7 +99,7 @@ pub trait AnyPlugin: Send + Sync + Any + AnyPluginClone + 'static {
     fn build(&self) -> Box<dyn PluginState>;
 }
 
-impl<S: PluginState, B: Plugin<State=S> + Clone> AnyPlugin for B {
+impl<S: PluginState, B: Plugin<State = S> + Clone> AnyPlugin for B {
     fn build(&self) -> Box<dyn PluginState> {
         Box::new(self.build())
     }
@@ -112,16 +110,14 @@ impl<S: PluginState, B: Plugin<State=S> + Clone> AnyPlugin for B {
 pub trait PluginStateClone {
     fn clone_box(&self) -> Box<dyn PluginState>;
 }
-
 impl<T> PluginStateClone for T
-    where
-        T: 'static + PluginState + Clone,
+where
+    T: 'static + PluginState + Clone,
 {
     fn clone_box(&self) -> Box<dyn PluginState> {
         Box::new(self.clone())
     }
 }
-
 impl Clone for Box<dyn PluginState> {
     fn clone(&self) -> Self {
         self.clone_box()
@@ -133,16 +129,14 @@ impl Clone for Box<dyn PluginState> {
 pub trait AnyPluginClone {
     fn clone_box(&self) -> Box<dyn AnyPlugin>;
 }
-
 impl<T> AnyPluginClone for T
-    where
-        T: 'static + Plugin + Clone,
+where
+    T: 'static + Plugin + Clone,
 {
     fn clone_box(&self) -> Box<dyn AnyPlugin> {
         Box::new(self.clone())
     }
 }
-
 impl Clone for Box<dyn AnyPlugin> {
     fn clone(&self) -> Self {
         self.clone_box()
