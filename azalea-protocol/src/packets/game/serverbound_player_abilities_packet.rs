@@ -2,6 +2,7 @@ use crate::packets::BufReadError;
 use azalea_buf::{McBufReadable, McBufWritable};
 use azalea_protocol_macros::ServerboundGamePacket;
 use std::io::Cursor;
+use trust_dns_resolver::proto::serialize::binary::BinEncodable;
 
 #[derive(Clone, Debug, ServerboundGamePacket)]
 pub struct ServerboundPlayerAbilitiesPacket {
@@ -23,7 +24,8 @@ impl McBufWritable for ServerboundPlayerAbilitiesPacket {
         if self.is_flying {
             byte = 2;
         }
-        byte.write_into(buf)?;
+
+        byte.to_bytes().write_into(buf)?;
         Ok(())
     }
 }
