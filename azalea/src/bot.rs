@@ -19,7 +19,7 @@ pub struct State {
     jumping_once: Arc<Mutex<bool>>,
 }
 
-#[async_trait]
+#[async_trait(?Send)]
 impl crate::PluginState for State {
     async fn handle(self: Box<Self>, event: Event, mut bot: Client) {
         if let Event::Tick = event {
