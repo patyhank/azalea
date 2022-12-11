@@ -25,7 +25,7 @@ impl McBufWritable for ServerboundPlayerAbilitiesPacket {
             byte = 2;
         }
 
-        byte.to_bytes().write_into(buf)?;
+        byte.to_bytes().unwrap().write_into(buf)?;
         Ok(())
     }
 }
