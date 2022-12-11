@@ -5,7 +5,7 @@ use std::io::Cursor;
 
 #[derive(Clone, Debug, ServerboundGamePacket)]
 pub struct ServerboundPlayerAbilitiesPacket {
-    is_flying: bool,
+    pub is_flying: bool,
 }
 
 impl McBufReadable for ServerboundPlayerAbilitiesPacket {
