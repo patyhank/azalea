@@ -81,9 +81,9 @@ impl IntoIterator for PluginStates {
 
 /// A `PluginState` keeps the current state of a plugin for a client. All the
 /// fields must be atomic. Unique `PluginState`s are built from [`Plugin`]s.
-#[async_trait]
+#[async_trait(?Send)]
 pub trait PluginState: Send + Sync + PluginStateClone + Any + 'static {
-    async fn handle(self: Box<Self>, event: Event, bot: Client) -> Pin<Box<(dyn Future<Output=()> + std::marker::Send)>>;
+    async fn handle(self: Box<Self>, event: Event, bot: Client);
 }
 
 /// Plugins can keep their own personal state, listen to [`Event`]s, and add
