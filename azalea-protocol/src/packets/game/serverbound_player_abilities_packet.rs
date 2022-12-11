@@ -21,7 +21,7 @@ impl McBufWritable for ServerboundPlayerAbilitiesPacket {
     fn write_into(&self, buf: &mut impl std::io::Write) -> Result<(), std::io::Error> {
         let mut byte = 0;
         if self.is_flying {
-            byte |= 2;
+            byte = 2;
         }
         byte.write_into(buf)?;
         Ok(())
