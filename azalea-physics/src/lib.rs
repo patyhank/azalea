@@ -83,7 +83,7 @@ fn travel(
         //     return;
         // }
 
-        let gravity: f64 = 0.08;
+        let gravity: f64 = 0.00;
 
         // TODO: slow falling effect
         // let is_falling = self.delta.y <= 0.;
