@@ -352,6 +352,7 @@ pub struct Food {
     pub saturation: f32,
     pub can_always_eat: bool,
     pub eat_seconds: f32,
+    pub using_converts_to: Option<ItemSlot>,
     pub effects: Vec<PossibleEffect>,
 }
 impl DataComponent for Food {}

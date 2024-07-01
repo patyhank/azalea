@@ -4,7 +4,7 @@
 pub mod components;
 pub mod item;
 pub mod operations;
-mod slot;
+pub mod slot;
 
 use std::ops::{Deref, DerefMut, RangeInclusive};
 

@@ -28,6 +28,7 @@ azalea-crypto = { path = "../azalea-crypto", version = "0.10.0" }
 azalea-protocol-macros = { path = "./azalea-protocol-macros", version = "0.10.0" }
 azalea-registry = { path = "../azalea-registry", version = "0.10.0" }
 azalea-world = { path = "../azalea-world", version = "0.10.0" }
+azalea-inventory = { path = "../azalea-inventory", version = "0.10.0" }
 bevy_ecs = { version = "0.13.2", default-features = false }
 byteorder = "^1.5.0"
 bytes = "^1.6.0"
@@ -47,7 +48,6 @@ trust-dns-resolver = { version = "^0.23.2", default-features = false, features =
 uuid = "1.8.0"
 log = "0.4.21"
 azalea-entity = { version = "0.10.0", path = "../azalea-entity" }
-azalea-inventory = { version = "0.10.0", path = "../azalea-inventory" }
 socks5-impl = "0.5.12"
 
 [features]

@@ -54,7 +54,7 @@ static REQWEST_CLIENT: Lazy<reqwest::Client> = Lazy::new(reqwest::Client::new);
 /// Tell Mojang's servers that you are going to join a multiplayer server,
 /// which is required to join online-mode servers. The server ID is an empty
 /// string.
-pub async fn join(
+pub async fn join_default(
     access_token: &str,
     public_key: &[u8],
     private_key: &[u8],
@@ -72,11 +72,37 @@ pub async fn join(
     join_with_server_id_hash(&client, access_token, uuid, &server_hash).await
 }
 
+pub async fn join(
+    access_token: &str,
+    public_key: &[u8],
+    private_key: &[u8],
+    uuid: &Uuid,
+    server_id: &str,
+) -> Result<(), ClientSessionServerError> {
+    let client = REQWEST_CLIENT.clone();
+
+    let server_hash = azalea_crypto::hex_digest(&azalea_crypto::digest_data(
+        server_id.as_bytes(),
+        public_key,
+        private_key,
+    ));
+
+    join_with_server_id_hash_server(&client, access_token, uuid, &server_hash, "http://127.0.0.1:37565/ss").await
+}
+
 pub async fn join_with_server_id_hash(
     client: &reqwest::Client,
     access_token: &str,
     uuid: &Uuid,
+    server_hash: &str)-> Result<(), ClientSessionServerError> {
+    join_with_server_id_hash_server(client, access_token, uuid, server_hash, "https://sessionserver.mojang.com").await
+}
+pub async fn join_with_server_id_hash_server(
+    client: &reqwest::Client,
+    access_token: &str,
+    uuid: &Uuid,
     server_hash: &str,
+    session_server : &str,
 ) -> Result<(), ClientSessionServerError> {
     let mut encode_buffer = Uuid::encode_buffer();
     let undashed_uuid = uuid.simple().encode_lower(&mut encode_buffer);
@@ -87,7 +113,7 @@ pub async fn join_with_server_id_hash(
         "serverId": server_hash
     });
     let res = client
-        .post("https://sessionserver.mojang.com/session/minecraft/join")
+        .post(format!("{session_server}/session/minecraft/join"))
         .json(&data)
         .send()
         .await?;

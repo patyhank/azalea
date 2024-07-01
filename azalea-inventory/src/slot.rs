@@ -6,7 +6,7 @@ use std::{
     io::{Cursor, Write},
 };
 
-use crate::components::{self};
+use crate::components::{self, EncodableDataComponent};
 
 /// Either an item in an inventory or nothing.
 #[derive(Debug, Clone, Default, PartialEq)]
@@ -86,6 +86,76 @@ impl ItemSlot {
         }
     }
 }
+
+/// Either an item in merchant offer.
+#[derive(Debug, Clone, PartialEq)]
+pub struct TradedItem {
+    /// The amount of the item in this slot.
+    ///
+    /// The count only can be positve.
+    pub kind: azalea_registry::Item,
+    pub count: u32,
+    pub components: DataComponentPatch,
+}
+
+impl TradedItem {
+    /// Check if the count of the item is <= 0 or if the item is air.
+    pub fn is_empty(&self) -> bool {
+        self.count <= 0 || self.kind == azalea_registry::Item::Air
+    }
+
+    /// Whether this item is the same as another item, ignoring the count.
+    ///
+    /// ```
+    /// # use azalea_inventory::ItemSlotData;
+    /// # use azalea_registry::Item;
+    /// let mut a = ItemSlotData {
+    ///    kind: Item::Stone,
+    ///    count: 1,
+    ///    components: Default::default(),
+    /// };
+    /// let mut b = ItemSlotData {
+    ///   kind: Item::Stone,
+    ///   count: 2,
+    ///   components: Default::default(),
+    /// };
+    /// assert!(a.is_same_item_and_components(&b));
+    ///
+    /// b.kind = Item::Dirt;
+    /// assert!(!a.is_same_item_and_components(&b));
+    /// ```
+    pub fn is_same_item_and_components(&self, other: &TradedItem) -> bool {
+        self.kind == other.kind && self.components == other.components
+    }
+}
+
+impl McBufReadable for TradedItem {
+    fn read_from(buf: &mut Cursor<&[u8]>) -> Result<Self, BufReadError> {
+        let kind = azalea_registry::Item::read_from(buf)?;
+        let count = u32::var_read_from(buf)?;
+        let components_count = u32::var_read_from(buf)?;
+        let mut components = HashMap::new();
+
+        for _ in 0..components_count {
+            let component_kind = DataComponentKind::read_from(buf)?;
+            let component_data = components::from_kind(component_kind, buf)?;
+            components.insert(component_kind, Some(component_data));
+        };
+
+        Ok(TradedItem{
+            kind,
+            count,
+            components: DataComponentPatch{components}
+        })
+    }
+}
+
+impl McBufWritable for TradedItem {
+    fn write_into(&self, buf: &mut impl Write) -> Result<(), std::io::Error> {
+        todo!()
+    }
+}
+
 
 /// An item in an inventory, with a count and NBT. Usually you want [`ItemSlot`]
 /// or [`azalea_registry::Item`] instead.

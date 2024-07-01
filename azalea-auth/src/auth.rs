@@ -29,7 +29,7 @@ pub struct AuthOpts {
 #[derive(Debug, Error)]
 pub enum AuthError {
     #[error(
-        "The Minecraft API is indicating that you don't own the game. \
+    "The Minecraft API is indicating that you don't own the game. \
         If you're using Xbox Game Pass, set `check_ownership` to false in the auth options."
     )]
     DoesNotOwnGame,
@@ -120,7 +120,7 @@ pub async fn auth(email: &str, opts: AuthOpts) -> Result<AuthResult, AuthError> 
                     profile: profile.clone(),
                 },
             )
-            .await
+                .await
             {
                 tracing::error!("{}", e);
             }
@@ -156,7 +156,7 @@ pub async fn get_minecraft_token(
             .expect("Xbox Live auth token shouldn't have expired yet")
             .token,
     )
-    .await?;
+        .await?;
 
     // Minecraft auth
     let mca = auth_with_minecraft(client, &xbl_auth.data.user_hash, &xsts_token).await?;
@@ -255,6 +255,21 @@ pub struct ProfileResponse {
     pub name: String,
     pub skins: Vec<serde_json::Value>,
     pub capes: Vec<serde_json::Value>,
+}
+
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct SerializableGameProfile {
+    pub name: String,
+    pub id: String,
+}
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct KAuthResponse {
+    pub access_token: String,
+    pub client_token: String,
+    pub selected_profile: SerializableGameProfile,
+    pub available_profiles: Vec<SerializableGameProfile>,
 }
 
 // nintendo switch (so it works for accounts that are under 18 years old)
@@ -565,4 +580,31 @@ pub async fn get_profile(
     tracing::trace!("{:?}", res);
 
     Ok(res)
+}
+
+
+pub async fn kas(usercode: &str) -> Result<AuthResult, AuthError> {
+    let client = reqwest::Client::new();
+    let response = client.post("http://127.0.0.1:37565/as/authenticate")
+        .header("Content-Type", "application/json")
+        .json(&json!({
+            "agent": {
+                "name": "Minecraft",
+                "version": 1
+            },
+            "username": usercode.to_string(),
+            "password": "empty",
+            "clientToken": "empty",
+            "requestUser": true
+        }))
+        .send().await.unwrap().json::<KAuthResponse>().await.unwrap();
+    Ok(AuthResult{
+        access_token: response.access_token,
+        profile: ProfileResponse{
+            id: Uuid::parse_str(&response.selected_profile.id).unwrap(),
+            name: response.selected_profile.name.clone(),
+            skins: vec![],
+            capes: vec![]
+        }
+    })
 }

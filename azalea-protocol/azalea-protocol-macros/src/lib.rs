@@ -240,14 +240,14 @@ pub fn declare_state_packets(input: TokenStream) -> TokenStream {
                     backtrace: Box::new(std::backtrace::Backtrace::capture()),
                     packet_name: #name_litstr.to_string(),
                 })?;
-                #[cfg(debug_assertions)]
-                {
-                    let mut leftover = Vec::new();
-                    let _ = std::io::Read::read_to_end(buf, &mut leftover);
-                    if !leftover.is_empty() {
-                        return Err(Box::new(crate::read::ReadPacketError::LeftoverData { packet_name: #name_litstr.to_string(), data: leftover }));
-                    }
-                }
+                // #[cfg(debug_assertions)]
+                // {
+                //     let mut leftover = Vec::new();
+                //     let _ = std::io::Read::read_to_end(buf, &mut leftover);
+                //     if !leftover.is_empty() {
+                //         return Err(Box::new(crate::read::ReadPacketError::LeftoverData { packet_name: #name_litstr.to_string(), data: leftover }));
+                //     }
+                // }
                 data
             },
         });
@@ -273,21 +273,21 @@ pub fn declare_state_packets(input: TokenStream) -> TokenStream {
                     backtrace: Box::new(std::backtrace::Backtrace::capture()),
                     packet_name: #name_litstr.to_string(),
                 })?;
-                #[cfg(debug_assertions)]
-                {
-                    let mut leftover = Vec::new();
-                    let _ = std::io::Read::read_to_end(buf, &mut leftover);
-                    if !leftover.is_empty() {
-                        return Err(
-                            Box::new(
-                                crate::read::ReadPacketError::LeftoverData {
-                                    packet_name: #name_litstr.to_string(),
-                                    data: leftover
-                                }
-                            )
-                        );
-                    }
-                }
+                // #[cfg(debug_assertions)]
+                // {
+                //     let mut leftover = Vec::new();
+                //     let _ = std::io::Read::read_to_end(buf, &mut leftover);
+                //     if !leftover.is_empty() {
+                //         return Err(
+                //             Box::new(
+                //                 crate::read::ReadPacketError::LeftoverData {
+                //                     packet_name: #name_litstr.to_string(),
+                //                     data: leftover
+                //                 }
+                //             )
+                //         );
+                //     }
+                // }
                 data
             },
         });

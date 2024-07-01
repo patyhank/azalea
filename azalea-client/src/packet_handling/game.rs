@@ -18,13 +18,7 @@ use azalea_entity::{
 };
 use azalea_protocol::{
     packets::game::{
-        clientbound_player_combat_kill_packet::ClientboundPlayerCombatKillPacket,
-        serverbound_accept_teleportation_packet::ServerboundAcceptTeleportationPacket,
-        serverbound_configuration_acknowledged_packet::ServerboundConfigurationAcknowledgedPacket,
-        serverbound_keep_alive_packet::ServerboundKeepAlivePacket,
-        serverbound_move_player_pos_rot_packet::ServerboundMovePlayerPosRotPacket,
-        serverbound_pong_packet::ServerboundPongPacket, ClientboundGamePacket,
-        ServerboundGamePacket,
+        clientbound_level_particles_packet::ClientboundLevelParticlesPacket, clientbound_player_combat_kill_packet::ClientboundPlayerCombatKillPacket, serverbound_accept_teleportation_packet::ServerboundAcceptTeleportationPacket, serverbound_configuration_acknowledged_packet::ServerboundConfigurationAcknowledgedPacket, serverbound_keep_alive_packet::ServerboundKeepAlivePacket, serverbound_move_player_pos_rot_packet::ServerboundMovePlayerPosRotPacket, serverbound_pong_packet::ServerboundPongPacket, ClientboundGamePacket, ServerboundGamePacket
     },
     read::deserialize_packet,
 };
@@ -163,6 +157,17 @@ pub fn send_packet_events(
                     {
                         Ok(packet) => packet,
                         Err(err) => {
+                            match err.as_ref() {
+                                azalea_protocol::read::ReadPacketError::Parse { packet_id, packet_name, backtrace, source } => {
+                                    if *packet_id == 0x29 {
+                                        continue;
+                                    }
+                                }
+                                azalea_protocol::read::ReadPacketError::LeftoverData { data, packet_name } => {
+                                    continue;
+                                }
+                                _ => {},
+                            }
                             error!("failed to read packet: {:?}", err);
                             debug!("packet bytes: {:?}", raw_packet);
                             continue;
@@ -1261,7 +1266,7 @@ pub fn process_packet_events(ecs: &mut World) {
             }
             ClientboundGamePacket::HorseScreenOpen(_) => {}
             ClientboundGamePacket::MapItemData(_) => {}
-            ClientboundGamePacket::MerchantOffers(_) => {}
+            ClientboundGamePacket::MerchantOffers(p) => {}
             ClientboundGamePacket::MoveVehicle(_) => {}
             ClientboundGamePacket::OpenBook(_) => {}
             ClientboundGamePacket::OpenScreen(p) => {

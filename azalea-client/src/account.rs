@@ -64,6 +64,9 @@ pub enum AccountOpts {
     Microsoft {
         email: String,
     },
+    Konjac {
+        usercode: String,
+    },
     MicrosoftWithAccessToken {
         msa: Arc<Mutex<azalea_auth::cache::ExpiringValue<AccessTokenResponse>>>,
     },
@@ -85,6 +88,19 @@ impl Account {
         }
     }
 
+    pub async fn konjac(usercode: &str) -> Result<Self, azalea_auth::AuthError> {
+        let result = azalea_auth::kas(usercode).await?;
+        Ok(Self {
+            username: result.profile.name,
+            access_token: Some(Arc::new(Mutex::new(result.access_token))),
+            uuid: Some(result.profile.id),
+            account_opts: AccountOpts::Konjac {
+                usercode: usercode.to_string(),
+            },
+            certs: None,
+        })
+    }
+
     /// This will create an online-mode account by authenticating with
     /// Microsoft's servers. Note that the email given is actually only used as
     /// a key for the cache, but it's recommended to use the real email to
@@ -103,7 +119,7 @@ impl Account {
                 ..Default::default()
             },
         )
-        .await?;
+            .await?;
         Ok(Self {
             username: auth_result.profile.name,
             access_token: Some(Arc::new(Mutex::new(auth_result.access_token))),
@@ -173,6 +189,7 @@ impl Account {
         match &self.account_opts {
             // offline mode doesn't need to refresh so just don't do anything lol
             AccountOpts::Offline { .. } => Ok(()),
+            AccountOpts::Konjac { .. } => Ok(()),
             AccountOpts::Microsoft { email } => {
                 let new_account = Account::microsoft(email).await?;
                 let access_token_mutex = self.access_token.as_ref().unwrap();

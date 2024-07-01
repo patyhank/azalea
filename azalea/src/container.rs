@@ -57,10 +57,16 @@ impl ContainerClientExt for Client {
         self.block_interact(pos);
 
         let mut receiver = self.get_tick_broadcaster();
+        let mut counter = 0;
         while receiver.recv().await.is_ok() {
             let ecs = self.ecs.lock();
             if ecs.get::<WaitingForInventoryOpen>(self.entity).is_none() {
                 break;
+            } else {
+                counter += 1;
+                if counter > 200 {
+                    return None;
+                }
             }
         }
 

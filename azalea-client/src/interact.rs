@@ -302,13 +302,13 @@ pub fn handle_swing_arm_event(
     mut send_packet_events: EventWriter<SendPacketEvent>,
 ) {
     for event in events.read() {
-        send_packet_events.send(SendPacketEvent {
-            entity: event.entity,
-            packet: ServerboundSwingPacket {
-                hand: InteractionHand::MainHand,
-            }
-            .get(),
-        });
+        // send_packet_events.send(SendPacketEvent {
+        //     entity: event.entity,
+        //     packet: ServerboundSwingPacket {
+        //         hand: InteractionHand::MainHand,
+        //     }
+        //     .get(),
+        // });
     }
 }
 
@@ -367,7 +367,6 @@ fn update_modifiers_for_held_item(
             .attack_speed
             .insert(azalea_entity::attributes::base_attack_speed_modifier(
                 added_attack_speed,
-            ))
-            .unwrap();
+            ));
     }
 }
